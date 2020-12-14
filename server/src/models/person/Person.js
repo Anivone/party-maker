@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
             Person.hasOne(models.PersonRating, {
                 foreignKey: "personId",
                 as: 'rating'
+            });
+            Person.hasOne(models.UserAccount, {
+                foreignKey: 'personId',
+                as: 'account'
             })
         }
     }

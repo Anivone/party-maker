@@ -1,14 +1,18 @@
 'use strict';
 module.exports = {
     up: async (queryInterface, Sequelize) => {
-        await queryInterface.createTable('PersonParties', {
+        await queryInterface.createTable('UserAccounts', {
             id: {
                 allowNull: false,
                 autoIncrement: true,
                 primaryKey: true,
                 type: Sequelize.INTEGER
             },
-            partyId: {
+            email: {
+                type: Sequelize.STRING,
+                allowNull: false,
+            },
+            password: {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
@@ -23,7 +27,7 @@ module.exports = {
             personId: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
-                onDelete: 'CASCADE',
+                onDelete: "CASCADE",
                 references: {
                     model: 'People',
                     key: 'id',
@@ -33,6 +37,6 @@ module.exports = {
         });
     },
     down: async (queryInterface, Sequelize) => {
-        await queryInterface.dropTable('PersonParties');
+        await queryInterface.dropTable('UserAccounts');
     }
 };
