@@ -1,9 +1,9 @@
 const { createContainer, asValue, asClass } = require ('awilix');
-const db = require('./loaders/postgres/models');
+const db = require('./models/person');
 
 const container = createContainer();
 container.register({
-    sequelize: asValue(db.sequelize),
+    postgres: asValue(db),
 });
 
 module.exports = container;
