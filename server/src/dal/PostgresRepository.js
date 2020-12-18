@@ -1,8 +1,7 @@
 module.exports = class PostgresRepository {
 
-    constructor({postgres, crypto}) {
+    constructor({postgres}) {
         this.postgres = postgres;
-        this.crypto = crypto;
     };
 
     async findAll(model, filter) {
@@ -20,14 +19,8 @@ module.exports = class PostgresRepository {
     async get(model, id) {
         return await this.postgres[model].findByPk(id);
     }
-    //TODO: separate concerns (dal should not implement the logic of generating salt and password)
+
     async create(model, body) {
-        if(model === 'UserAccount') {
-            body.salt = this.crypto.randomBytes(64).toString('hex');
-
-            body.password = this.postgres.UserAccount.encryptPassword(body.password, body.salt);
-        }
-
         return await this.postgres[model].create(body);
     }
 
@@ -43,4 +36,7 @@ module.exports = class PostgresRepository {
         });
     }
 
+    getModel(model) {
+        return this.postgres[model];
+    }
 }
