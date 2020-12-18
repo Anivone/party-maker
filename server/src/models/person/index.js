@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { Sequelize, DataTypes } = require('sequelize');
 const basename = path.basename(__filename);
-const _ = require('dotenv').config();
+require('dotenv').config();
 const db = {};
 
 const sequelize = new Sequelize(

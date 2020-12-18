@@ -1,10 +1,7 @@
-const container = require("../../../container");
-
 const express = require('express');
+const passport = require('passport');
 
 const app = express();
-
-const {passport} = container.cradle;
 
 app.post('/', [],
     async (req, res, next) => {

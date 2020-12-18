@@ -1,19 +1,23 @@
-const express = require('express');
 const { createContainer, asValue, asClass, asFunction } = require ('awilix');
 const db = require('./models/person');
-const crypto = require('crypto');
 const passport = require('passport');
 const to = require('await-to');
+const crypto = require('crypto');
 
-const app = express();
+const PostgresRepository = require('./dal/PostgresRepository');
 
-const container = createContainer();
-container.register({
-    app: asValue(app),
-    postgres: asValue(db),
-    passport: asValue(passport),
-    crypto: asValue(crypto),
-    to: asValue(to)
-});
+module.exports = () => {
+    const container = createContainer();
 
-module.exports = container;
+    container.register({
+        postgres: asValue(db),
+        passport: asValue(passport),
+        to: asValue(to),
+        crypto: asValue(crypto),
+
+        // Repositories
+        postgresRepository: asClass(PostgresRepository).singleton(),
+    });
+
+    return container;
+};

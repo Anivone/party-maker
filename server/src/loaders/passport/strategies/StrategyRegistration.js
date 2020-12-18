@@ -1,7 +1,7 @@
-const container = require("../../../container");
+const container = require("../../../container")();
 const LocalStrategy = require('passport-local').Strategy;
 
-const {postgres, to, crypto} = container.cradle;
+const {postgres, to} = container.cradle;
 
 module.exports = passport => {
     passport.serializeUser((user, done) => {
@@ -27,6 +27,10 @@ module.exports = passport => {
             },
             (req, email, password, next) => {
                 const {
+                    postgresRepository
+                } = req.container.cradle;
+
+                const {
                     firstName,
                     lastName,
                     middleName,
@@ -37,13 +41,7 @@ module.exports = passport => {
 
                 process.nextTick(async () => {
                     const [errFind, userFind] = await to(
-                        postgres.UserAccount.findOne(
-                            {
-                                where: {
-                                    email
-                                }
-                            }
-                        )
+                        postgresRepository.findOne('UserAccount',{email})
                     );
 
                     if (errFind) return next(errFind);
@@ -51,7 +49,7 @@ module.exports = passport => {
                         return next(new Error('User with such email already exists.'));
 
                     const [errPerson, person] = await to(
-                        postgres.Person.create({
+                        postgresRepository.create('Person',{
                             firstName,
                             lastName,
                             middleName,
@@ -63,17 +61,8 @@ module.exports = passport => {
 
                     if (errPerson) return next(errPerson);
 
-                    const salt = crypto.randomBytes(64).toString('hex');
-
-                    const pwd = postgres.UserAccount.encryptPassword(password, salt);
-
                     const [errNew, userNew] = await to(
-                        postgres.UserAccount.create({
-                            email,
-                            password: pwd,
-                            salt,
-                            personId: person.id
-                        })
+                        postgresRepository.create('UserAccount', {email, password, personId: person.id})
                     );
 
                     if (errNew) return next(errNew);

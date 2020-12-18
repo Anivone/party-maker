@@ -1,8 +1,8 @@
+const express = require('express');
 const initApp = require('./src/loaders');
 const initRoutes = require('./src/api');
-const container = require('./src/container');
 
-const app = container.cradle.app;
+const app = express();
 
 initApp(app);
 initRoutes(app);

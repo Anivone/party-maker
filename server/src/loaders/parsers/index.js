@@ -1,5 +1,8 @@
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const {scopePerRequest} = require("awilix-express");
+
+const container = require('../../container')();
 
 module.exports = app => {
     app.use(cors());
@@ -10,4 +13,6 @@ module.exports = app => {
             extended: true,
         }),
     );
+
+    app.use(scopePerRequest(container));
 }
