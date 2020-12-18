@@ -12,7 +12,7 @@ module.exports = async (app) => {
 
     initParsers(app);
     initSession(app);
-    await initMongo();
+    await initMongo(container.cradle);
     initPassport(app, container.cradle);
 
 }
