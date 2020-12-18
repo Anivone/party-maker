@@ -6,6 +6,7 @@ const crypto = require('crypto');
 
 // Services
 const UserService = require('./services/user/UserService');
+const PersonService = require('./services/person/PersonService');
 
 // Repositories
 const PostgresRepository = require('./dal/PostgresRepository');
@@ -22,6 +23,7 @@ module.exports = () => {
 
         // Services
         userService: asClass(UserService).singleton(),
+        personService: asClass(PersonService).singleton(),
 
         // Repositories
         postgresRepository: asClass(PostgresRepository).singleton(),

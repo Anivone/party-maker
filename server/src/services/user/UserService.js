@@ -1,8 +1,9 @@
 module.exports = class UserService {
 
-    constructor({postgresRepository, to}) {
+    constructor({postgresRepository, to, personService}) {
         this.postgresRepository = postgresRepository;
         this.to = to;
+        this.personService = personService;
     }
 
     async findUser(filter, single) {
@@ -50,7 +51,7 @@ module.exports = class UserService {
         if (userFind) throw new Error('User with such email already exists.');
 
         const [errPerson, person] = await to(
-            this.postgresRepository.create('Person', {
+            this.personService.createPerson({
                 firstName,
                 lastName,
                 middleName,
