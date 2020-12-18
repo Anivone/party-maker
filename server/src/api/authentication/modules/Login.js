@@ -1,10 +1,12 @@
 const express = require('express');
-const passport = require('passport');
-
 const app = express();
 
 app.post('/', [],
     async (req, res, next) => {
+        const {
+            passport
+        } = req.container.cradle;
+
         passport.authenticate(
             'user-login',
             {
