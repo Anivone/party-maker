@@ -1,9 +1,6 @@
-const container = require("../../container")();
-const { passport } = container.cradle;
-
-module.exports = app => {
+module.exports = (app, {passport, userService, to}) => {
     app.use(passport.initialize());
     app.use(passport.session());
-    require('./strategies/StrategyRegistration')(passport);
-    require('./strategies/StrategyLogin')(passport);
+    require('./strategies/StrategyRegistration')(passport, userService, to);
+    require('./strategies/StrategyLogin')(passport, userService, to);
 }
