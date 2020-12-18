@@ -19,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
             });
         }
 
+        static generateSalt() {
+            return crypto.randomBytes(64).toString('hex');
+        }
+
         static encryptPassword(password, salt) {
             return crypto.pbkdf2Sync(
                 password,
@@ -59,5 +63,6 @@ module.exports = (sequelize, DataTypes) => {
         sequelize,
         modelName: 'UserAccount',
     });
+
     return UserAccount;
 };
