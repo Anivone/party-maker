@@ -103,66 +103,87 @@ module.exports = class PartyService {
         return await this.Party.remove(filter);
     }
 
-    async getRecommendedParties(personId) {
-        const [errPerson, person] = await this.to(
-            this.personService.getPerson(personId)
+    async getRecommendedParties() {
+        const [errPerson, people] = await this.to(
+            this.personService.findPerson({}, false)
         );
-        if (errPerson) throw errPerson;
 
-        const [errFind, parties] = await this.to(
-            this.findPartiesFullInformation({})
-        )
-        if (errFind) throw errFind;
+        const recommendCount = 3;
+        let result = [];
 
-        const personParties = parties
-            .filter(f => f.participants.includes(personId.toString()));
+        for (const person of people) {
+            let res = {
+                ...person.dataValues,
+                recommendedParties: []
+            };
+            const personId = person.id;
+            if (errPerson) throw errPerson;
 
-        const averagePrice = personParties
-            .map(p => p.features.price)
-            .reduce((total, p) => {
-                return total + p;
-            }) / personParties.length;
+            const [errFind, parties] = await this.to(
+                this.findPartiesFullInformation({})
+            )
+            if (errFind) throw errFind;
 
-        let priority = {
-            dancing: 0,
-            alcohol: 0,
-            hookah: 0,
-            ottoman: 0
-        };
-        let priorityCount = 0;
+            const personParties = parties
+                .filter(f => f.participants.includes(personId.toString()));
 
-        personParties.forEach(f => {
-            for (let key in priority) {
-                if (f.features[key]) {
-                    ++priority[key];
-                    ++priorityCount;
-                }
+            if (personParties.length === 0) {
+                res.recommendedParties = parties.slice(0, recommendCount);
+                result.push(res);
+                continue;
             }
-        });
-        for (let key in priority) {
-            priority[key] = parseFloat((priority[key] / priorityCount / 2)
-                .toFixed(2));
+
+            const averagePrice = personParties
+                .map(p => p.features.price)
+                .reduce((total, p) => {
+                    return total + p;
+                }) / personParties.length;
+
+            let priority = {
+                dancing: 0,
+                alcohol: 0,
+                hookah: 0,
+                ottoman: 0
+            };
+            let priorityCount = 0;
+
+            personParties.forEach(f => {
+                for (let key in priority) {
+                    if (f.features[key]) {
+                        ++priority[key];
+                        ++priorityCount;
+                    }
+                }
+            });
+            for (let key in priority) {
+                priority[key] = parseFloat((priority[key] / priorityCount / 2)
+                    .toFixed(2));
+            }
+
+            const otherParties = parties
+                .filter(p => !p.participants.includes(personId.toString()))
+                .sort((a, b) => b.value - a.value);
+
+            otherParties.map(p => {
+                p.value = 0;
+                for (let key in priority) {
+                    if (p.features[key])
+                        p.value += priority[key];
+                }
+                if (p.address.city === person.city)
+                    p.value += 0.24;
+                if (averagePrice + 200 >= p.features.price)
+                    p.value += 0.24;
+
+                p.value = parseFloat(p.value.toFixed(2));
+            });
+
+            res.recommendedParties = otherParties.slice(0, recommendCount);
+
+            result.push(res);
         }
 
-        const otherParties = parties
-            .filter(p => !p.participants.includes(personId.toString()))
-            .sort((a, b) => b.value - a.value);
-
-        otherParties.map(p => {
-            p.value = 0;
-            for (let key in priority) {
-                if (p.features[key])
-                    p.value += priority[key];
-            }
-            if (p.address.city === person.city)
-                p.value += 0.24;
-            if (averagePrice + 200 >= p.features.price)
-                p.value += 0.24;
-
-            p.value = parseFloat(p.value.toFixed(2));
-        });
-
-        return otherParties;
+        return result;
     }
 
 }
