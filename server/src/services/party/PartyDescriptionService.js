@@ -11,8 +11,8 @@ module.exports = class PartyDescriptionService {
             : this.PartyDescription.find(filter, projection);
     }
 
-    async getPartyDescription(id) {
-        return await this.PartyDescription.get(id);
+    async getPartyDescription(id, projection) {
+        return await this.PartyDescription.findById({_id: id}, projection);
     }
 
     async createPartyDescription({

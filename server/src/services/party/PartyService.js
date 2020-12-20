@@ -1,8 +1,10 @@
 module.exports = class PartyService {
 
-    constructor({Party, to}) {
+    constructor({Party, to, partyDescriptionService, personService}) {
         this.Party = Party;
         this.to = to;
+        this.partyDescriptionService = partyDescriptionService;
+        this.personService = personService;
     }
 
     async findParty(filter, single, projection) {
@@ -11,8 +13,39 @@ module.exports = class PartyService {
             : this.Party.find(filter, projection);
     }
 
-    async getParty(id) {
-        return await this.Party.get(id);
+    async aggregateParty(aggregation) {
+        return await this.Party.aggregate(aggregation);
+    }
+
+    async findPartiesFullInformation(filter) {
+        return await this.aggregateParty([
+            {
+                $match: filter
+            },
+            {
+                $lookup: {
+                    from: 'partyoptions',
+                    localField: '_id',
+                    foreignField: 'partyId',
+                    as: 'options'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'partydescriptions',
+                    localField: '_id',
+                    foreignField: 'partyId',
+                    as: 'features'
+                }
+            },
+            {
+                $unwind: '$features'
+            }
+        ]);
+    }
+
+    async getParty(id, projection) {
+        return await this.Party.findById({_id: id}, projection);
     }
 
     async createParty({
@@ -23,19 +56,43 @@ module.exports = class PartyService {
                           age,
                           requiredParticipants,
                           maximumParticipants,
-                          participants,
+                          participants = [],
+                          price,
+                          music,
+                          dancing,
+                          alcohol,
+                          hookah,
+                          ottoman
                       }) {
-        return await this.Party.create(
-            {
-                title,
-                description,
-                address,
-                date,
-                age,
-                requiredParticipants,
-                maximumParticipants,
-                participants,
-            });
+        const [errParty, party] = await this.to(
+            this.Party.create(
+                {
+                    title,
+                    description,
+                    address,
+                    date,
+                    age,
+                    requiredParticipants,
+                    maximumParticipants,
+                    participants,
+                })
+        );
+        if (errParty) throw errParty;
+
+        const [errDesc, _] = await this.to(
+            this.partyDescriptionService.createPartyDescription({
+                price,
+                music,
+                dancing,
+                alcohol,
+                hookah,
+                ottoman,
+                partyId: party._id,
+            })
+        );
+        if (errDesc) throw errDesc;
+
+        return this.findPartiesFullInformation({_id: party._id});
     }
 
     async updateParty(filter, body) {
@@ -44,6 +101,68 @@ module.exports = class PartyService {
 
     async removeParty(filter) {
         return await this.Party.remove(filter);
+    }
+
+    async getRecommendedParties(personId) {
+        const [errPerson, person] = await this.to(
+            this.personService.getPerson(personId)
+        );
+        if (errPerson) throw errPerson;
+
+        const [errFind, parties] = await this.to(
+            this.findPartiesFullInformation({})
+        )
+        if (errFind) throw errFind;
+
+        const personParties = parties
+            .filter(f => f.participants.includes(personId.toString()));
+
+        const averagePrice = personParties
+            .map(p => p.features.price)
+            .reduce((total, p) => {
+                return total + p;
+            }) / personParties.length;
+
+        let priority = {
+            dancing: 0,
+            alcohol: 0,
+            hookah: 0,
+            ottoman: 0
+        };
+        let priorityCount = 0;
+
+        personParties.forEach(f => {
+            for (let key in priority) {
+                if (f.features[key]) {
+                    ++priority[key];
+                    ++priorityCount;
+                }
+            }
+        });
+        for (let key in priority) {
+            priority[key] = parseFloat((priority[key] / priorityCount / 2)
+                .toFixed(2));
+        }
+
+        const otherParties = parties
+            .filter(p => !p.participants.includes(personId.toString()))
+            .sort((a, b) => b.value - a.value);
+
+        otherParties.map(p => {
+            p.value = 0;
+            for (let key in priority) {
+                if (p.features[key])
+                    p.value += priority[key];
+            }
+            if (p.address.city === person.city)
+                p.value += 0.24;
+            if (averagePrice + 200 >= p.features.price)
+                p.value += 0.24;
+
+            p.value = parseFloat(p.value.toFixed(2));
+        });
+
+        return otherParties;
     }
 
 }

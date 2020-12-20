@@ -11,8 +11,8 @@ module.exports = class PartyOptionService {
             : this.PartyOption.find(filter, projection);
     }
 
-    async getPartyOption(id) {
-        return await this.PartyOption.get(id);
+    async getPartyOption(id, projection) {
+        return await this.PartyOption.findById({_id: id}, projection);
     }
 
     async createPartyOption({

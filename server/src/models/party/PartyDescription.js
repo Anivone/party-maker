@@ -15,24 +15,28 @@ module.exports = ({mongoose}) => {
                     required: true,
                 }],
                 wishlist: [{
-                    type: mongoose.SchemaTypes.Number,
+                    type: mongoose.SchemaTypes.String,
                     required: false,
                 }],
             },
             dancing: {
                 type: mongoose.SchemaTypes.Boolean,
+                default: false,
                 required: true,
             },
             alcohol: {
                 type: mongoose.SchemaTypes.Boolean,
+                default: false,
                 required: true,
             },
             hookah: {
-                type: mongoose.SchemaTypes.Number,
+                type: mongoose.SchemaTypes.Boolean,
+                default: false,
                 required: false,
             },
             ottoman: {
-                type: mongoose.SchemaTypes.Number,
+                type: mongoose.SchemaTypes.Boolean,
+                default: false,
                 required: true,
             },
             partyId: {

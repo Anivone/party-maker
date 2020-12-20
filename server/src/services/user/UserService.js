@@ -1,9 +1,10 @@
 module.exports = class UserService {
 
-    constructor({postgresRepository, to, personService}) {
+    constructor({postgresRepository, to, personService, personRatingService}) {
         this.postgresRepository = postgresRepository;
         this.to = to;
         this.personService = personService;
+        this.personRatingService = personRatingService;
     }
 
     async findUser(filter, single) {
@@ -66,6 +67,13 @@ module.exports = class UserService {
             this.createUser(email, password, person.id)
         );
         if (errUser) throw errUser;
+
+        const [errRating, _] = await to(
+            this.personRatingService.createPersonRating({
+                personId: person.id,
+            })
+        );
+        if (errRating) throw errRating;
 
         return user;
     }

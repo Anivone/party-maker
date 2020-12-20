@@ -13,6 +13,8 @@ const PartyOption = require('./models/party/PartyOption');
 // Services
 const UserService = require('./services/user/UserService');
 const PersonService = require('./services/person/PersonService');
+const PersonRatingService = require('./services/person/PersonRatingService');
+const PersonPartyService = require('./services/person/PersonPartyService');
 const PartyService = require('./services/party/PartyService');
 const PartyDescriptionService = require('./services/party/PartyDescriptionService');
 const PartyOptionService = require('./services/party/PartyOptionService');
@@ -38,6 +40,8 @@ module.exports = () => {
         // Services
         userService: asClass(UserService).singleton(),
         personService: asClass(PersonService).singleton(),
+        personRatingService: asClass(PersonRatingService).singleton(),
+        personPartyService: asClass(PersonPartyService).singleton(),
         partyService: asClass(PartyService).singleton(),
         partyDescriptionService: asClass(PartyDescriptionService).singleton(),
         partyOptionService: asClass(PartyOptionService).singleton(),

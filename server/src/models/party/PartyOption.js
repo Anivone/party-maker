@@ -19,6 +19,7 @@ module.exports = ({mongoose}) => {
             },
             currentVotes: {
                 type: mongoose.SchemaTypes.Number,
+                default: 0,
                 required: true,
             },
             partyId: {
