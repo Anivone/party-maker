@@ -18,6 +18,7 @@ const PersonPartyService = require('./services/person/PersonPartyService');
 const PartyService = require('./services/party/PartyService');
 const PartyDescriptionService = require('./services/party/PartyDescriptionService');
 const PartyOptionService = require('./services/party/PartyOptionService');
+const RecommendationService = require('./services/recommendation/RecommendationService');
 
 // Repositories
 const PostgresRepository = require('./dal/PostgresRepository');
@@ -45,6 +46,7 @@ module.exports = () => {
         partyService: asClass(PartyService).singleton(),
         partyDescriptionService: asClass(PartyDescriptionService).singleton(),
         partyOptionService: asClass(PartyOptionService).singleton(),
+        recommendationService: asClass(RecommendationService).singleton(),
 
         // Repositories
         postgresRepository: asClass(PostgresRepository).singleton(),
