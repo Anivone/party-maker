@@ -28,10 +28,10 @@ app.get('/:id', async (req, res, next) => {
     } = req.container.cradle;
 
     const { id } = req.params;
-    const personRatingId = parseInt(id);
+    const personId = parseInt(id);
 
     const [err, personRating] = await to(
-        personRatingService.getPersonRating(personRatingId)
+        personRatingService.findPersonRating({personId}, true)
     );
     if (err) return next(err);
 

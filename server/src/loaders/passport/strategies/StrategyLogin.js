@@ -29,7 +29,7 @@ module.exports = (passport, userService, to) => {
                     );
                     if (err) return next(err);
 
-                    req.session.userId = user.id;
+                    req.session.userId = user.personId;
                     req.session.authorized = true;
 
                     return next(null);
